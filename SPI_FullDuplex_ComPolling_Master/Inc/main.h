@@ -47,7 +47,6 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -58,10 +57,17 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BUTTON_USER_Pin GPIO_PIN_13
+#define BUTTON_USER_GPIO_Port GPIOC
+#define LED4_Pin GPIO_PIN_5
+#define LED4_GPIO_Port GPIOA
+#define MLX_INTR_Pin GPIO_PIN_2
+#define MLX_INTR_GPIO_Port GPIOB
+#define MLX_TRIG_Pin GPIO_PIN_9
+#define MLX_TRIG_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 /* Size of buffer */
-#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

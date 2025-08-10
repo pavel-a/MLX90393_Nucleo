@@ -35,6 +35,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Buffer used for transmission */
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 uint16_t aTxBuffer[] = {0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0,0x1234,0x5678,0x9ABC,0xDEF0};
 __IO uint16_t ubNbDataToTransmit = BUFFERSIZE;
 __IO uint8_t ubTransmitIndex = 0;
@@ -172,6 +174,8 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  __HAL_FLASH_SET_LATENCY(FLASH_LATENCY_1);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -218,23 +222,24 @@ static void MX_SPI1_Init(void)
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
   hspi1.Init.CRCPolynomial = 7;
   hspi1.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
   if (HAL_SPI_Init(&hspi1) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN SPI1_Init 2 */
-
+  LL_SPI_SetRxFIFOThreshold(SPI1, LL_SPI_RX_FIFO_TH_QUARTER);
+  LL_SPI_Disable(SPI1); // To drop HW NSS, disable the SPI
   /* USER CODE END SPI1_Init 2 */
 
 }
@@ -246,11 +251,36 @@ static void MX_SPI1_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, LED4_Pin|MLX_TRIG_Pin, GPIO_PIN_RESET);
+
+#if 0  /*Configure GPIO pin : BUTTON_USER_Pin */
+  GPIO_InitStruct.Pin = BUTTON_USER_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BUTTON_USER_GPIO_Port, &GPIO_InitStruct);
+#endif
+  /*Configure GPIO pins : LED4_Pin MLX_TRIG_Pin */
+  GPIO_InitStruct.Pin = LED4_Pin|MLX_TRIG_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : MLX_INTR_Pin */
+  GPIO_InitStruct.Pin = MLX_INTR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING; //$$$ for now use as INPUT --pa01
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(MLX_INTR_GPIO_Port, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -354,23 +384,26 @@ static void MX_USART2_UART_Init(void)
 void SPI_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsigned rxlen, uint8_t *status)
 {
     SPI_TypeDef *spix = hspi1.Instance;
-    uint8_t v;
 
-    // ACTIVATE CS $$$$$$$$$$$$$$$$$$$
+    // ACTIVATE NSS
+    LL_SPI_Enable(spix);
+    (void)LL_SPI_GetNSSMode(spix); //$$$ delay after activating NSS
+
     // Transmit TXBUF
-    unsigned i = 0;
-    while (i < txlen) {
+    for (unsigned i = 0; i < txlen; i++) {
         /* Check TXE flag to transmit data */
         while (!LL_SPI_IsActiveFlag_TXE(spix)) {}
         /* Transmit 8 bit Data */
-        LL_SPI_TransmitData8(spix, txbuf[i++]);
+        LL_SPI_TransmitData8(spix, txbuf[i]);
         /* Check RXNE flag */
         while (!LL_SPI_IsActiveFlag_RXNE(spix)) {}
         /* Receive 8 bit dummy data */
+        uint8_t v;
         v = LL_SPI_ReceiveData8(spix);
     }
+
     // Receive:
-    // Status is 1st read byte
+    // Status is 1st IN byte
     while (!LL_SPI_IsActiveFlag_TXE(spix)) {}
     /* Transmit 8 bit dummy data */
     LL_SPI_TransmitData8(spix, 0);
@@ -379,8 +412,7 @@ void SPI_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
     /* Receive 8 bit dummy data */
     *status = LL_SPI_ReceiveData8(spix);
 
-    i = 0;
-    while (i < rxlen) {
+    for (unsigned i = 0; i < rxlen; i++) {
         /* Check TXE flag to transmit data */
         while (!LL_SPI_IsActiveFlag_TXE(spix)) {}
         /* Transmit 8 bit dummy data */
@@ -388,8 +420,9 @@ void SPI_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
         /* Check RXNE flag */
         while (!LL_SPI_IsActiveFlag_RXNE(spix)) {}
         /* Receive 8 bit dummy data */
-        rxbuf[i++] = LL_SPI_ReceiveData8(spix);
+        rxbuf[i] = LL_SPI_ReceiveData8(spix);
     }
 
     // DROP CS $$$$$$$$$$$$$$$$$$$
+    LL_SPI_Disable(spix);
 }

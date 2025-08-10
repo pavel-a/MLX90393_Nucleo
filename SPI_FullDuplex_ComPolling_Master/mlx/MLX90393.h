@@ -27,18 +27,17 @@ struct sensors_event_t;
 
 #define MLX90393_DEFAULT_ADDR (0x0C) /* I2C Can also be 0x18, depending on IC */
 
-#define MLX90393_AXIS_ALL (0x0E)      /**< X+Y+Z axis bits for commands. */
 #define MLX90393_CONF1 (0x00)         /**< Gain */
 #define MLX90393_CONF2 (0x01)         /**< Burst, comm mode */
 #define MLX90393_CONF3 (0x02)         /**< Oversampling, filter, res. */
-#define MLX90393_CONF4 (0x03)         /**< Sensitivty drift. */
+#define MLX90393_CONF4 (0x03)         /**< Sensitivity drift. */
 #define MLX90393_GAIN_SHIFT (4)       /**< Left-shift for gain bits. */
 #define MLX90393_HALL_CONF (0x0C)     /**< Hall plate spinning rate adj. */
+#define MLX90393_STATUS_MASK (0xFC)   /**< Mask for the status byte checks. [DS] pg.21 */
 #define MLX90393_STATUS_OK (0x00)     /**< OK value for status response. */
-#define MLX90393_STATUS_SMMODE (0x08) /**< SM Mode status response. */
-#define MLX90393_STATUS_RESET (0x01)  /**< Reset value for status response. */
-#define MLX90393_STATUS_ERROR (0xFF)  /**< OK value for status response. */
-#define MLX90393_STATUS_MASK (0xFC)   /**< Mask for status OK checks. */
+#define MLX90393_STATUS_SMMODE (0x08) /**< SM Mode status response. $$$ burst flag - pa01 */
+#define MLX90393_STATUS_RESET (0x04)  /**< Reset value for status response */
+#define MLX90393_STATUS_ERROR (0xFF)  /**< ??? pa01 */
 
 /** Commands, see [DS, table 11] */
 enum {
@@ -54,6 +53,12 @@ enum {
   MLX90393_REG_RT = (0xF0),  /**< Reset. */
   MLX90393_REG_NOP = (0x00), /**< NOP. */
 };
+
+#define MLX90393_AXIS_X  (0x08)       /**< X axis bit for RM and other commands. */
+#define MLX90393_AXIS_Y  (0x04)       /**< Y axis bit for RM and other commands. */
+#define MLX90393_AXIS_Z  (0x02)       /**< Z axis bit for RM and other commands. */
+#define MLX90393_AXIS_ALL (0x0E)      /**< X+Y+Z axes bits for RM and other commands. */
+#define MLX90393_AXIS_T   (0x01)      /**< Temperature bit for RM command. */
 
 /** Gain settings for CONF1 register. */
 typedef enum mlx90393_gain {
@@ -179,6 +184,7 @@ public:
   bool exitMode(void);
 
   bool readMeasurement(float *x, float *y, float *z);
+  bool readMeasurementRaw(uint16_t *data, uint8_t mask); //+pa
   bool startSingleMeasurement(void);
 
   bool setGain(enum mlx90393_gain gain);
@@ -199,7 +205,7 @@ public:
   bool getEvent(sensors_event_t *event);
   void getSensor(sensor_t *sensor);
 
-private:
+//private:
   //Adafruit_I2CDevice *i2c_dev = NULL;
   //Adafruit_SPIDevice *spi_dev = NULL;
 

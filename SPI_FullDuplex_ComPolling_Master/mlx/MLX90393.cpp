@@ -305,7 +305,7 @@ bool Adafruit_MLX90393::setTrigInt(bool state) {
 bool Adafruit_MLX90393::startSingleMeasurement(void) {
   uint8_t tx[1] = {MLX90393_REG_SM | MLX90393_AXIS_ALL};
 
-  /* Set the device to single measurement mode */
+  /* Set the device to single measurement mode and trigger a measurement */
   uint8_t stat = transceive(tx, sizeof(tx), NULL, 0, 0);
   if ((stat == MLX90393_STATUS_OK) || (stat == MLX90393_STATUS_SMMODE)) {
     return true;
@@ -322,6 +322,32 @@ bool Adafruit_MLX90393::startSingleMeasurement(void) {
  *
  * @return True on command success
  */
+
+bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t mask)
+{
+    if (mask == 0 || (mask & ~(MLX90393_AXIS_ALL|MLX90393_AXIS_T))) {
+        return false;
+    }
+
+    uint8_t tx[1];
+    tx[0] = MLX90393_REG_RM|mask;
+    // NOTE: low nibble=0 means take the mask from NV config. We don't impl this yet. - pa01
+    uint8_t datacnt = __builtin_popcount(mask);
+
+    if (transceive(tx, sizeof(tx), (uint8_t*)data, datacnt*sizeof(uint16_t), 0) != MLX90393_STATUS_OK) {
+      return false;
+    }
+
+    /* Convert data to LE */
+    for ( ; datacnt; --datacnt, ++data )
+    {
+        *data = __builtin_bswap16(*data);
+    }
+    return true;
+}
+
+
+
 bool Adafruit_MLX90393::readMeasurement(float *x, float *y, float *z) {
   uint8_t tx[1] = {MLX90393_REG_RM | MLX90393_AXIS_ALL};
   uint8_t rx[6] = {0};
@@ -441,14 +467,12 @@ bool Adafruit_MLX90393::getEvent(sensors_event_t *event) {
  * @param rxlen     The number of bytes to read back (not including the
  *                  mandatory status byte that is always returned).
  *
- * @return The status byte from the IC.
+ * @return The status byte from the IC
  */
 uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
                                       uint8_t *rxbuf, uint8_t rxlen,
                                       uint8_t interdelay) {
   uint8_t status = 0;
-  uint8_t i;
-
 #if 0
   uint8_t rxbuf2[rxlen + 2];
   if (i2c_dev) {
@@ -463,7 +487,7 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
       return MLX90393_STATUS_ERROR;
     }
     status = rxbuf2[0];
-    for (i = 0; i < rxlen; i++) {
+    for (unsigned i = 0; i < rxlen; i++) {
       rxbuf[i] = rxbuf2[i + 1];
     }
   }
@@ -471,7 +495,7 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
   if (spi_dev) {
     spi_dev->write_then_read(txbuf, txlen, rxbuf2, rxlen + 1, 0x00);
     status = rxbuf2[0];
-    for (i = 0; i < rxlen; i++) {
+    for (unsigned i = 0; i < rxlen; i++) {
       rxbuf[i] = rxbuf2[i + 1];
     }
     delay(interdelay);
@@ -479,8 +503,8 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
 #endif
   SPI_MLX_transact(txbuf, txlen, rxbuf, rxlen, &status);
   delay(interdelay);
-  /* Mask out bytes available in the status response. */
-  return (status >> 2);
+  /* Mask out bits 0,1 in the status response. */
+  return (status & MLX90393_STATUS_MASK);
 }
 
 /**************************************************************************/

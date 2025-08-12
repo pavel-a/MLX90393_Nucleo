@@ -354,8 +354,8 @@ void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
     {
         //I2C error!
         uint32_t err = HAL_I2C_GetError(&hi2c1);
-        g_last_i2c_err = err;
-        *status = 0xFF;//$$$$$$
+        g_last_i2c_err = err; //Bitmask: HAL_I2C_ERROR_AF=0x4 HAL_I2C_ERROR_TIMEOUT=0x20
+        *status = 0xFF;//$$$$$$TBD
         dbgprintf("MLX I2C err %4.4X\n", (unsigned)err);
     }
 }
@@ -363,10 +363,8 @@ void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
 
 
 /**
-  * @brief  I2C error callbacks.
+  * @brief  I2C error callback for async functions
   * @param  I2cHandle: I2C handle
-  * @note   This example shows a simple way to report transfer error, and you can
-  *         add your own implementation.
   * @retval None
   */
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *I2cHandle)
@@ -375,10 +373,14 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *I2cHandle)
     * 1- When Slave doesn't acknowledge its address, Master restarts communication.
     * 2- When Master doesn't acknowledge the last data transferred, Slave doesn't care in this example.
     */
-  if (HAL_I2C_GetError(I2cHandle) != HAL_I2C_ERROR_AF)
+    __BKPT(4);
+#if 0
+    uint32_t errcode = HAL_I2C_GetError(I2cHandle);
+  if (errcode != HAL_I2C_ERROR_AF) // slave does not ACK its address
   {
-    Error_Handler();
+    Error_Handler(); // ??? TBD what to do
   }
+#endif
 }
 
 

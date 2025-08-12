@@ -11,6 +11,7 @@ static MLX90393 g_mlx;
 
 typedef float float_t;
 
+#define dbgprintf(fmt,...) dprintf(1, fmt, ## __VA_ARGS__) 
 
 
 
@@ -24,12 +25,14 @@ void test()
   uint16_t v;
   b = g_mlx.readRegister(0, &v);
   if (!b) ++err;
+  else
+      dbgprintf("Reg0=%4.4X\n", v );
 
-  uint16_t meas[4];
+  uint16_t meas[4]; // order: TXYZ
   b = g_mlx.readMeasurementRaw(&meas[0], 0xF);
   if (!b) ++err;
-
-  printf("%d %u\n", err, v );
+  // Temperature [pg.11]: 45.0/DEG.C; value@25C=46244
+  dbgprintf("%d temp=%u\n", err, meas[0] );
   
 #if 0  
   b = g_mlx.begin_SPI(42, nullptr);

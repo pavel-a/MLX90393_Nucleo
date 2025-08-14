@@ -8,7 +8,13 @@
 #include <cstdio>
 
 #define dbgprintf(fmt,...) dprintf(1, fmt, ## __VA_ARGS__) 
-extern "C" void HAL_Delay(unsigned ms);
+
+extern "C" {
+
+void HAL_Delay(unsigned ms);
+void wait_button(void);
+bool check_button(void);
+}
 
 inline void delay(unsigned ms)
 {
@@ -28,11 +34,21 @@ void test()
   int err=0;
   
   // TEST $$$$
-  uint16_t v;
-  b = g_mlx.readRegister(MLX90393_CONF1, &v);
+  b = g_mlx.exitMode();
   if (!b) ++err;
-  else
-      dbgprintf("Reg0=%4.4X\n", v );
+  b = g_mlx.reset();
+  if (!b) ++err;
+  delay(2); // after reset
+
+  uint16_t v;
+  for (uint8_t nr=0; nr < 16; nr++) {
+      b = g_mlx.readRegister(nr, &v);
+      if (!b) ++err;
+      else
+          dbgprintf("Reg.%u=%4.4X\n", nr, v );
+  }
+
+  while(1) {
 
   b = g_mlx.startSingleMeasurement(0xF);
   if (!b) ++err;
@@ -40,9 +56,14 @@ void test()
   uint16_t meas[4] = {0}; // order: TXYZ
   b = g_mlx.readMeasurementRaw(&meas[0], 0xF);
   if (!b) ++err;
+  dbgprintf("%d x=%u y=%u z=%u\n", err, meas[1], meas[2], meas[3]);
   // Temperature [pg.11]: 45.0/DEG.C; value@25C=46244
-  dbgprintf("%d temp=%u\n", err, meas[0] );
+  int itemp = (((int)meas[0] - 46244 + (45/2)) / 45) + 25;
+  dbgprintf("%d temp=%u\n", err, itemp );
   
+  wait_button();
+  }
+
 #if 0  
   b = g_mlx.begin_SPI(42, nullptr);
   if (!b) ++err;

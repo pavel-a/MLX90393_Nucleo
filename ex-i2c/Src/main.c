@@ -94,17 +94,6 @@ int main(void)
 
   /* Configure User push-button */
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-#if 0
-  /* Wait for User push-button press before starting the Communication */
-  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
-  {
-  }
-
-  /* Wait for User push-button release before starting the Communication */
-  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
-  {
-  }
-#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -350,6 +339,7 @@ void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
     if (st == HAL_OK)
     {
         *status = pData[0];
+        memcpy(rxbuf, &pData[1], rxlen);
     }
     else
     {
@@ -393,6 +383,26 @@ int _write(int fd, const char *p, unsigned len)
     }
     HAL_UART_Transmit(&huart2, (uint8_t*)p, len, HAL_MAX_DELAY);
     return len;
+}
+
+
+void wait_button(void)
+{
+  // BUTT1 active low
+  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_RESET)
+  {
+  }
+
+  while (BSP_PB_GetState(BUTTON_USER) != GPIO_PIN_SET)
+  {
+  }
+}
+
+
+_Bool check_button(void)
+{
+  // BUTT1 active low
+  return (BSP_PB_GetState(BUTTON_USER) == GPIO_PIN_RESET);
 }
 
 

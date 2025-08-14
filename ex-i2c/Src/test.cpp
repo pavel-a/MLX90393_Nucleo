@@ -7,12 +7,18 @@
 #include <cstring>
 #include <cstdio>
 
+#define dbgprintf(fmt,...) dprintf(1, fmt, ## __VA_ARGS__) 
+extern "C" void HAL_Delay(unsigned ms);
+
+inline void delay(unsigned ms)
+{
+    if(0 == ms) return;
+    HAL_Delay(ms);
+}
+
 static MLX90393 g_mlx;
 
 typedef float float_t;
-
-#define dbgprintf(fmt,...) dprintf(1, fmt, ## __VA_ARGS__) 
-
 
 
 extern "C"
@@ -23,12 +29,15 @@ void test()
   
   // TEST $$$$
   uint16_t v;
-  b = g_mlx.readRegister(0, &v);
+  b = g_mlx.readRegister(MLX90393_CONF1, &v);
   if (!b) ++err;
   else
       dbgprintf("Reg0=%4.4X\n", v );
 
-  uint16_t meas[4]; // order: TXYZ
+  b = g_mlx.startSingleMeasurement();
+  if (!b) ++err;
+  delay(2); // TODO wait for READY pin
+  uint16_t meas[4] = {0}; // order: TXYZ
   b = g_mlx.readMeasurementRaw(&meas[0], 0xF);
   if (!b) ++err;
   // Temperature [pg.11]: 45.0/DEG.C; value@25C=46244

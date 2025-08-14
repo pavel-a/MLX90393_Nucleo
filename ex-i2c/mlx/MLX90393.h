@@ -205,6 +205,9 @@ public:
   bool getEvent(sensors_event_t *event);
   void getSensor(sensor_t *sensor);
 
+//++pa01
+  uint8_t last_status;
+
 //private:
   //Adafruit_I2CDevice *i2c_dev = NULL;
   //Adafruit_SPIDevice *spi_dev = NULL;

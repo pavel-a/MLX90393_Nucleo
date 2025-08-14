@@ -335,7 +335,7 @@ bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t mask)
     // NOTE: low nibble=0 means take the mask from NV config. We don't impl this yet. - pa01
     uint8_t datacnt = __builtin_popcount(mask);
     uint8_t status = transceive(tx, sizeof(tx), (uint8_t*)data, datacnt*sizeof(uint16_t), 0); 
-    if ( status != MLX90393_STATUS_OK && status != MLX90393_STATUS_SMMODE) {
+    if ( status != MLX90393_STATUS_OK) {
       return false;
     }
 
@@ -502,6 +502,7 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
   }
 #endif
   I2C_MLX_transact(txbuf, txlen, rxbuf, rxlen, &status);
+  last_status = status; //$$$ dbg pa01
   delay(interdelay);
   /* Mask out bits 0,1 in the status response. */
   return (status & MLX90393_STATUS_MASK);

@@ -37,7 +37,7 @@ struct sensors_event_t;
 #define MLX90393_STATUS_OK (0x00)     /**< OK value for status response. */
 #define MLX90393_STATUS_SMMODE (0x20) /**< SM Mode status response */
 #define MLX90393_STATUS_RESET (0x04)  /**< Reset value for status response */
-#define MLX90393_STATUS_ERROR (0xFF)  /**< ??? pa01 */
+#define MLX90393_STATUS_ERROR (0xFF)  /**< error status $$$ not masked?? */
 
 /** Commands, see [DS, table 11] */
 enum {
@@ -185,7 +185,7 @@ public:
 
   bool readMeasurement(float *x, float *y, float *z);
   bool readMeasurementRaw(uint16_t *data, uint8_t mask); //+pa
-  bool startSingleMeasurement(void);
+  bool startSingleMeasurement(uint8_t zyxt = MLX90393_AXIS_ALL);
 
   bool setGain(enum mlx90393_gain gain);
   enum mlx90393_gain getGain(void);

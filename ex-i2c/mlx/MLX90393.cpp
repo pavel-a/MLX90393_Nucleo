@@ -299,14 +299,13 @@ bool Adafruit_MLX90393::setTrigInt(bool state) {
 }
 
 /**
- * Begin a single measurement on all axes
- *
+ * Begin a single measurement on specified axes
+ *   (default: all except temperature)
  * @return True on command success
  */
-bool Adafruit_MLX90393::startSingleMeasurement(void) {
-  uint8_t tx[1] = {MLX90393_REG_SM | MLX90393_AXIS_ALL};
-
+bool Adafruit_MLX90393::startSingleMeasurement(uint8_t zyxt /*= MLX90393_AXIS_ALL*/) {
   /* Set the device to single measurement mode and trigger a measurement */
+  uint8_t tx[1] = {(uint8_t)(MLX90393_REG_SM | zyxt)};
   uint8_t stat = transceive(tx, sizeof(tx), NULL, 0, 0);
   if ((stat == MLX90393_STATUS_OK) || (stat == MLX90393_STATUS_SMMODE)) {
     return true;
@@ -324,16 +323,16 @@ bool Adafruit_MLX90393::startSingleMeasurement(void) {
  * @return True on command success
  */
 
-bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t mask)
+bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t zyxt)
 {
-    if (mask == 0 || (mask & ~(MLX90393_AXIS_ALL|MLX90393_AXIS_T))) {
+    if (zyxt == 0 || (zyxt & ~(MLX90393_AXIS_ALL|MLX90393_AXIS_T))) {
+        // zyxt==0 means use BURST_SEL value from NV config. We don't impl this yet. - pa01
         return false;
     }
 
     uint8_t tx[1];
-    tx[0] = MLX90393_REG_RM|mask;
-    // NOTE: low nibble=0 means take the mask from NV config. We don't impl this yet. - pa01
-    uint8_t datacnt = __builtin_popcount(mask);
+    tx[0] = MLX90393_REG_RM|zyxt;
+    uint8_t datacnt = __builtin_popcount(zyxt);
     uint8_t status = transceive(tx, sizeof(tx), (uint8_t*)data, datacnt*sizeof(uint16_t), 0); 
     if ( status != MLX90393_STATUS_OK) {
       return false;

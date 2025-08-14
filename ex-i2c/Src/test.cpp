@@ -34,7 +34,7 @@ void test()
   else
       dbgprintf("Reg0=%4.4X\n", v );
 
-  b = g_mlx.startSingleMeasurement();
+  b = g_mlx.startSingleMeasurement(0xF);
   if (!b) ++err;
   delay(2); // TODO wait for READY pin
   uint16_t meas[4] = {0}; // order: TXYZ

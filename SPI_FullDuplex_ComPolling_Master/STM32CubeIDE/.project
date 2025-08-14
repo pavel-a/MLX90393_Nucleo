@@ -34,7 +34,7 @@
 		<link>
 			<name>NOTES.txt</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/NOTES.txt</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/Doc/NOTES.txt</locationURI>
 		</link>
 		<link>
 			<name>Application/User/MLX90393.cpp</name>

@@ -3,6 +3,9 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.370000314">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.370000314" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<macros>
+					<stringMacro name="STM32Cube_FW_C0" type="VALUE_PATH_DIR" value="/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -39,17 +42,13 @@
 									<listOptionValue builtIn="false" value="STM32C031xx"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.1640666538" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../Inc"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/BSP/STM32C0xx_Nucleo"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/STM32C0xx_HAL_Driver/Inc"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/STM32C0xx_HAL_Driver/Inc/Legacy"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="../../Drivers/STM32C0xx_HAL_Driver/Inc"/>
-									<listOptionValue builtIn="false" value="../../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy"/>
-									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
-									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="../../Drivers/BSP/STM32C0xx_Nucleo"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../Inc"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/BSP/STM32C0xx_Nucleo"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/STM32C0xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/STM32C0xx_HAL_Driver/Inc/Legacy"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../Drivers/BSP/STM32C0xx_Nucleo"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.450916672" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -58,18 +57,12 @@
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.optimization.level.404268783" name="Optimization level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.optimization.level.value.og" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths.2023166573" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../Inc"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../mlx&quot;"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/BSP/STM32C0xx_Nucleo"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/STM32C0xx_HAL_Driver/Inc"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="../../Inc"/>
-									<listOptionValue builtIn="false" value="../../Drivers/STM32C0xx_HAL_Driver/Inc"/>
-									<listOptionValue builtIn="false" value="../../Drivers/STM32C0xx_HAL_Driver/Inc/Legacy"/>
-									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
-									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="../../Drivers/BSP/STM32C0xx_Nucleo"/>
-									<listOptionValue builtIn="false" value="C:/usr/src/STM32Cube/Repository/STM32Cube_FW_C0_V1.4.0/Drivers/STM32C0xx_HAL_Driver/Inc/Legacy"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../mlx"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/BSP/STM32C0xx_Nucleo"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/STM32C0xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/CMSIS/Device/ST/STM32C0xx/Include"/>
+									<listOptionValue builtIn="false" value="${STM32Cube_FW_C0}/Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../Drivers/BSP/STM32C0xx_Nucleo"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.definedsymbols.509099038" name="Define symbols (-D)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.option.definedsymbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>

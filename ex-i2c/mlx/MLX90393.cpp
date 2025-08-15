@@ -1,22 +1,31 @@
 /******************************************************************************
   This is a library for the MLX90393 magnetometer.
-  >>> Adapt I2C STM32 - pa WIP
+  >>> Adaptation for STM32, I2C  - pa WIP
+  Written by Kevin Townsend/ktown for Adafruit Industries.
+  MIT license, all text above must be included in any redistribution
  *****************************************************************************/
 
 #include "MLX90393.h"
 
 #define Adafruit_MLX90393 MLX90393
 
-extern "C" void HAL_Delay(unsigned ms);
-extern "C" void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsigned rxlen, uint8_t *status);
-extern "C" void SPI_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsigned rxlen, uint8_t *status);
+extern "C" {
 
+void HAL_Delay(unsigned ms);
+void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsigned rxlen, uint8_t *status);
+void SPI_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsigned rxlen, uint8_t *status);
+}
 
 
 inline void delay(unsigned ms)
 {
-	if(0 == ms) return;
-	HAL_Delay(ms);
+    if(0 == ms) return;
+    HAL_Delay(ms);
+}
+
+inline void delay(float ms)
+{
+    delay((unsigned int)ms);
 }
 
 MLX90393::Adafruit_MLX90393(void) {}
@@ -30,7 +39,6 @@ MLX90393::Adafruit_MLX90393(void) {}
  *    @return True if initialization was successful, otherwise false.
  */
 bool Adafruit_MLX90393::begin_I2C(uint8_t i2c_addr, TwoWire *wire) {
-    return false;
 #if 0///
   if (i2c_dev) {
     delete i2c_dev;
@@ -82,7 +90,7 @@ bool MLX90393::_init(void) {
   if (!reset())
     return false;
 
-  /* SET OPERATIONAL PARAMETERS: ALL VOLATILE! Override any nonvol. config! */
+  /* SET OPERATIONAL PARAMETERS: ALL VOLATILE! Overrides any nonvol. config! */
 
   /* Set gain. */
   if (!setGain(MLX90393_GAIN_1X)) {
@@ -105,7 +113,7 @@ bool MLX90393::_init(void) {
   if (!setFilter(MLX90393_FILTER_7))
     return false;
 
-  /* set INT pin to output interrupt <<<<< we want TRIG? -pa01 */
+  /* set INT pin to TRIGGER mode (input) -pa01 */
   if (!setTrigInt(false)) {
     return false;
   }
@@ -289,9 +297,7 @@ bool Adafruit_MLX90393::setTrigInt(bool state) {
   // mask off trigint bit
   data &= ~0x8000;
 
-  // set trigint bit if desired
   if (state) {
-    /* Set the INT, highest bit */
     data |= 0x8000;
   }
 
@@ -321,6 +327,7 @@ bool Adafruit_MLX90393::startSingleMeasurement(uint8_t zyxt /*= MLX90393_AXIS_AL
  * @param z     Pointer to where the 'z' value should be stored.
  *
  * @return True on command success
+ * @note Assumes the data is ready, or error will occur 
  */
 
 bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t zyxt)
@@ -330,8 +337,7 @@ bool MLX90393::readMeasurementRaw(uint16_t *data, uint8_t zyxt)
         return false;
     }
 
-    uint8_t tx[1];
-    tx[0] = MLX90393_REG_RM|zyxt;
+    uint8_t tx[1] = { (uint8_t)(MLX90393_REG_RM|zyxt) };
     uint8_t datacnt = __builtin_popcount(zyxt);
     uint8_t status = transceive(tx, sizeof(tx), (uint8_t*)data, datacnt*sizeof(uint16_t), 0); 
     if ( status != MLX90393_STATUS_OK) {
@@ -502,7 +508,7 @@ uint8_t Adafruit_MLX90393::transceive(uint8_t *txbuf, uint8_t txlen,
 #endif
   I2C_MLX_transact(txbuf, txlen, rxbuf, rxlen, &status);
   last_status = status; //$$$ dbg pa01
-  delay(interdelay);
+  delay((unsigned)interdelay);
   /* Mask out bits 0,1 in the status response. */
   return (status & MLX90393_STATUS_MASK);
 }

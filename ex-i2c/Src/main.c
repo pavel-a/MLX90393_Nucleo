@@ -89,7 +89,7 @@ int main(void)
   /* Configure LED4 */
   BSP_LED_Init(LED4);
 
-  const char message[] = "MLX I2C test2\r\n";
+  const char message[] = "MLX I2C test3\r\n";
   dbgprintf(message);
 
   /* Configure User push-button */
@@ -303,12 +303,40 @@ void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
         found:;
     }
 
-    // ST lib limitation: "mem address" up to 2 bytes I2C_MEMADD_SIZE_8BIT/I2C_MEMADD_SIZE_16BIT
     uint16_t MemAddress = 0;
     uint16_t MemAddSize = 0;
     uint8_t pData[10];
     uint16_t Size = 0;
     uint32_t Timeout = 10;
+
+    // ST lib limitation: "mem address" up to 2 bytes I2C_MEMADD_SIZE_8BIT/I2C_MEMADD_SIZE_16BIT
+    // For register write: do separate write and read. Not documented but seems to work.
+    // (as in the circuitpython driver by Kevin Townsend)
+    if (txlen > 2 && rxlen == 0) {
+        st = HAL_I2C_Master_Transmit(&hi2c1, DevAddress, (void*)txbuf, txlen, Timeout);
+        if (st != HAL_OK) {
+            //I2C error!
+            uint32_t err = HAL_I2C_GetError(&hi2c1);
+            g_last_i2c_err = err; //Bitmask: HAL_I2C_ERROR_AF=0x4 HAL_I2C_ERROR_TIMEOUT=0x20
+            *status = 0xFF;//$$$$$$TBD
+            dbgprintf("MLX I2C WR err %4.4X\n", (unsigned)err);
+            *status = 0xFF;
+            return;
+        }
+        // Now read status:
+        st = HAL_I2C_Master_Receive(&hi2c1, DevAddress, pData, 1, Timeout);
+        if (st != HAL_OK) {
+            //I2C error!
+            uint32_t err = HAL_I2C_GetError(&hi2c1);
+            g_last_i2c_err = err;
+            *status = 0xFF;
+            dbgprintf("MLX I2C RD err %4.4X\n", (unsigned)err);
+            *status = 0xFF;
+            return;
+        }
+        *status = pData[0];
+        return;
+    }
 
     // txbuf[0] is command
     switch(txlen)

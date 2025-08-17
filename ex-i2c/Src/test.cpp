@@ -29,24 +29,25 @@ typedef float float_t;
 extern "C"
 void test()
 {
+  auto &M = g_mlx;
   bool b;
   int err=0;
 
-  b = g_mlx.begin_I2C(0, nullptr);
+  b = M.begin_I2C(0, nullptr);
   
   uint16_t v;
   for (uint8_t nr=0; nr < 16; nr++) {
-      b = g_mlx.readRegister(nr, &v);
+      b = M.readRegister(nr, &v);
       if (!b) ++err;
       else
           dbgprintf("Reg.%u=%4.4X\n", nr, v );
   }
 
-  b = g_mlx.startSingleMeasurement(MLX90393_AXIS_T);
+  b = M.startSingleMeasurement(MLX90393_AXIS_T);
   if (!b) ++err;
   delay(2); // TODO wait for READY pin
   uint16_t meas[4] = {0}; // order: TXYZ
-  b = g_mlx.readMeasurementRaw(&meas[0], MLX90393_AXIS_T);
+  b = M.readMeasurementRaw(&meas[0], MLX90393_AXIS_T);
   if (!b) ++err;
   // Temperature [pg.11]: 45.0/DEG.C; value@25C=46244
   int itemp = (((int)meas[0] - 46244 + (45/2)) / 45) + 25;
@@ -55,9 +56,9 @@ void test()
   while(1) {
 
   float_t x,y,z;
-  b = g_mlx.readData(&x, &y, &z);
+  b = M.readData(&x, &y, &z);
   if (!b) ++err;
-  printf("%d : %d %d %d\n", err, (int)(x),(int)y,(int)z);
+  dbgprintf("%d : %d %d %d\n", err, (int)(x),(int)y,(int)z);
   
   wait_button();
   }
@@ -125,9 +126,6 @@ void test0()
   y += 1.0f;
   b = g_mlx.readData(&x, &y, &z);
   if (!b) ++err;
-  printf("%d : %d %d %d\n", err, (int)(x + 3.14f),(int)y,(int)z);
+  dbgprintf("%d : %d %d %d\n", err, (int)(x + 3.14f),(int)y,(int)z);
 #endif
 }
-
-
-

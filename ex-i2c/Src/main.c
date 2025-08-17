@@ -89,8 +89,7 @@ int main(void)
   /* Configure LED4 */
   BSP_LED_Init(LED4);
 
-  const char message[] = "MLX I2C test3\r\n";
-  dbgprintf(message);
+  dbgprintf("MLX I2C test3\r\n");
 
   /* Configure User push-button */
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);

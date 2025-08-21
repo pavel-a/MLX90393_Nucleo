@@ -8,7 +8,7 @@ This is a quick test of 3-axis magnetometer MLX90393 on a breakout board CJMCU-9
 
 The breakout board has two sets of soldering holes for SPI and I2C interfaces. No "qwiic" connectors.
 
-Started from I2C variant as the customer wants it.  
+Started from I2C variant because the device comes configured in I2C mode. Also hoping that I2C may be more tolerant to long wires.
 
 
 Adaptation for STM32 requires replacing the Arduino I2C or SPI layer with bare-metal STM32 (and optionally serial and GPIO).

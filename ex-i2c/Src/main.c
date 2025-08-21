@@ -161,7 +161,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00601854;
+  hi2c1.Init.Timing = 0x00601854; //Cube, @400 KHz
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
   //hi2c1.Init.OwnAddress1 = I2C_ADDRESS;
@@ -377,30 +377,6 @@ void I2C_MLX_transact(const uint8_t *txbuf, unsigned txlen, uint8_t *rxbuf, unsi
         dbgprintf("MLX I2C err %4.4X\n", (unsigned)err);
     }
 }
-
-
-
-/**
-  * @brief  I2C error callback for async functions
-  * @param  I2cHandle: I2C handle
-  * @retval None
-  */
-void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *I2cHandle)
-{
-  /** Error_Handler() function is called when error occurs.
-    * 1- When Slave doesn't acknowledge its address, Master restarts communication.
-    * 2- When Master doesn't acknowledge the last data transferred, Slave doesn't care in this example.
-    */
-    __BKPT(4);
-#if 0
-    uint32_t errcode = HAL_I2C_GetError(I2cHandle);
-  if (errcode != HAL_I2C_ERROR_AF) // slave does not ACK its address
-  {
-    Error_Handler(); // ??? TBD what to do
-  }
-#endif
-}
-
 
 int _write(int fd, const char *p, unsigned len)
 {
